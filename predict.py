@@ -78,7 +78,7 @@ class Predictor(BasePredictor):
         noise: int = Input(
              description="noise level, activated for Grayscale Image Denoising and Color Image Denoising.",
              default=15)
-         ):
+        ) -> Path:
         self.args.task = self.tasks[task_type]
         self.args.noise = noise
         self.args.jpeg = jpeg
