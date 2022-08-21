@@ -1,4 +1,4 @@
-from cog import BasePredictor, Path, Input
+from cog import BasePredictor, Path as CogPath, Input
 import tempfile
 from pathlib import Path
 import argparse
@@ -66,7 +66,7 @@ class Predictor(BasePredictor):
         }
 
     def predict(self, 
-        image: Path = Input(description="input image"),
+        image: CogPath = Input(description="input image"),
         task_type: str = Input(
             description='image restoration task type',
             default='Real-World Image Super-Resolution',
@@ -145,7 +145,7 @@ class Predictor(BasePredictor):
                 cv2.imwrite(str(out_path), output)
         finally:
             clean_folder(input_dir)
-        return Path(out_path)
+        return CogPath(out_path)
 
 
 def clean_folder(folder):
