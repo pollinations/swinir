@@ -1,6 +1,6 @@
-from cog import BasePredictor, Path as CogPath, Input
+from cog import BasePredictor, Path, Input
 import tempfile
-from pathlib import Path
+import pathlib
 import argparse
 import shutil
 import os
@@ -66,7 +66,7 @@ class Predictor(BasePredictor):
         }
 
     def predict(self, 
-        image: CogPath = Input(description="input image"),
+        image: Path = Input(description="input image"),
         task_type: str = Input(
             description='image restoration task type',
             default='Real-World Image Super-Resolution',
@@ -117,7 +117,7 @@ class Predictor(BasePredictor):
             test_results['ssim_y'] = []
             test_results['psnr_b'] = []
             # psnr, ssim, psnr_y, ssim_y, psnr_b = 0, 0, 0, 0, 0
-            out_path = Path(tempfile.mkdtemp()) / "out.png"
+            out_path = pathlib.Path(tempfile.mkdtemp()) / "out.png"
 
             for idx, path in enumerate(sorted(glob.glob(os.path.join(folder, '*')))):
                 # read image
@@ -145,7 +145,7 @@ class Predictor(BasePredictor):
                 cv2.imwrite(str(out_path), output)
         finally:
             clean_folder(input_dir)
-        return CogPath(out_path)
+        return Path(out_path)
 
 
 def clean_folder(folder):
