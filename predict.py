@@ -1,4 +1,4 @@
-import cog
+from cog import BasePredictor, Path, Input
 import tempfile
 from pathlib import Path
 import argparse
@@ -12,7 +12,7 @@ import numpy as np
 from main_test_swinir import define_model, setup, get_image_pair
 
 
-class Predictor(cog.Predictor):
+class Predictor(BasePredictor):
     def setup(self):
         model_dir = 'experiments/pretrained_models'
 
@@ -65,19 +65,20 @@ class Predictor(cog.Predictor):
             'JPEG Compression Artifact Reduction': 'jpeg_car'
         }
 
-    @cog.input("image", type=Path, help="input image")
-    @cog.input("task_type", type=str, default='Real-World Image Super-Resolution',
-               options=['Real-World Image Super-Resolution', 'Grayscale Image Denoising', 'Color Image Denoising',
-                        'JPEG Compression Artifact Reduction'],
-               help="image restoration task type")
-    @cog.input("noise", type=int, default=15, options=[15, 25, 50],
-               help='noise level, activated for Grayscale Image Denoising and Color Image Denoising. '
-                    'Leave it as default or arbitrary if other tasks are selected')
-    @cog.input("jpeg", type=int, default=40, options=[10, 20, 30, 40],
-               help='scale factor, activated for JPEG Compression Artifact Reduction. '
-                    'Leave it as default or arbitrary if other tasks are selected')
-    def predict(self, image, task_type='Real-World Image Super-Resolution', jpeg=40, noise=15):
-
+    def predict(self, 
+        image: Path = Input(description="input image"),
+        task_type: str = Input(
+            description='image restoration task type',
+            default='Real-World Image Super-Resolution',
+            choices=['Real-World Image Super-Resolution', 'Grayscale Image Denoising', 'Color Image Denoising','JPEG Compression Artifact Reduction']        
+        ),  
+        jpeg: int = Input(
+            description="scale factor, activated for JPEG Compression Artifact Reduction. ",
+            default=40),
+        noise: int = Input(
+             description="noise level, activated for Grayscale Image Denoising and Color Image Denoising.",
+             default=15)
+         ):
         self.args.task = self.tasks[task_type]
         self.args.noise = noise
         self.args.jpeg = jpeg
@@ -144,7 +145,7 @@ class Predictor(cog.Predictor):
                 cv2.imwrite(str(out_path), output)
         finally:
             clean_folder(input_dir)
-        return out_path
+        return Path(out_path)
 
 
 def clean_folder(folder):
