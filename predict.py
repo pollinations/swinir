@@ -14,7 +14,7 @@ from main_test_swinir import define_model, setup, get_image_pair
 
 class Predictor(BasePredictor):
     def setup(self):
-        model_dir = 'experiments/pretrained_models'
+        model_dir = '/experiments/pretrained_models'
 
         self.model_zoo = {
             'real_sr': {
