@@ -1,15 +1,17 @@
-from cog import BasePredictor, Path, Input
-import tempfile
-import pathlib
 import argparse
-import shutil
-import os
-import cv2
 import glob
-import torch
+import os
+import pathlib
+import shutil
+import tempfile
 from collections import OrderedDict
+
+import cv2
 import numpy as np
-from main_test_swinir import define_model, setup, get_image_pair
+import torch
+from cog import BasePredictor, Input, Path
+
+from main_test_swinir import define_model, get_image_pair, setup
 
 
 class Predictor(BasePredictor):
@@ -64,6 +66,7 @@ class Predictor(BasePredictor):
             'Color Image Denoising': 'color_dn',
             'JPEG Compression Artifact Reduction': 'jpeg_car'
         }
+
 
     def predict(self, 
         image: Path = Input(description="input image"),
