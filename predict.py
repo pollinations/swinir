@@ -1,8 +1,10 @@
 import argparse
 import glob
+import mimetypes
 import os
 import pathlib
 import shutil
+import subprocess
 import tempfile
 from collections import OrderedDict
 
@@ -12,6 +14,8 @@ import torch
 from cog import BasePredictor, Input, Path
 
 from main_test_swinir import define_model, get_image_pair, setup
+
+mimetypes.init()
 
 
 class Predictor(BasePredictor):
@@ -95,7 +99,49 @@ class Predictor(BasePredictor):
         else:
             self.args.model_path = self.model_zoo[self.args.task][jpeg]
 
+        mimestart = mimetypes.guess_type(image)[0]
+        if mimestart is None:
+            raise Exception("Could not determine file type of " + image)
+        mimestart = mimestart.split('/')[0]
+        is_video = mimestart == 'video'
+        # print("is_video", is_video)
+
+        if is_video:
+            # Save video framerate
+            # Execute  !ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 "$image"
+            # using python subprocess
+            args = ['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=r_frame_rate', '-of', 'default=noprint_wrappers=1:nokey=1', str(image)]
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err = p.communicate()
+            framerate = out.decode('utf-8').strip()
+            print("framerate", framerate)
+            multiplier, divisor = framerate.split('/')
+            framerate = float(multiplier) / float(divisor)
+            print("framerate", framerate)
+
+            # Extract frames
+            # execute !ffmpeg -i "$video_file" /%05d.jpg
+            # using python os.system
+            frames_path = Path('/output/')
+            frames_path.mkdir(exist_ok=True)
+            os.system('ffmpeg -i {} {}/%05d.jpg'.format(image, frames_path))
+
+            # Process frames
+            frames = list(frames_path.glob('*.jpg'))
+            frames.sort()
+            for frame in frames:
+                path = self.predict(frame, task_type, jpeg, noise)
+                print("path", path)
+                os.system('mv -v {} {}'.format(path, frame))
+
+            # Create video
+            # execute !ffmpeg -framerate "$framerate" -i /%05d.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p "$output_file"
+            # using python os.system
+            output_file = Path('/output/output.mp4')
+            os.system('ffmpeg -framerate {} -i {}/%05d.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {}'.format(framerate, frames_path, output_file))
+            return output_file
         try:
+            
             # set input folder
             input_dir = 'input_cog_temp'
             os.makedirs(input_dir, exist_ok=True)
@@ -105,11 +151,11 @@ class Predictor(BasePredictor):
                 self.args.folder_lq = input_dir
             else:
                 self.args.folder_gt = input_dir
-
+            # print("loading model", self.args.model_path)
             model = define_model(self.args)
             model.eval()
             model = model.to(self.device)
-
+            # print("loaded model")
             # setup folder and path
             folder, save_dir, border, window_size = setup(self.args)
             os.makedirs(save_dir, exist_ok=True)

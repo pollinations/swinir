@@ -4,6 +4,7 @@ build:
   system_packages:
     - "libgl1-mesa-glx"
     - "libglib2.0-0"
+    - "ffmpeg"
   python_packages:
     - "torchvision==0.9.0"
     - "torch==1.8.0"
