@@ -194,7 +194,8 @@ class Predictor(BasePredictor):
                 cv2.imwrite(str(out_path), output)
         finally:
             clean_folder(input_dir)
-        return Path(out_path)
+        # return Path(out_path)
+        return None
 
 
 def clean_folder(folder):
