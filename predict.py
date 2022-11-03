@@ -70,6 +70,7 @@ class Predictor(BasePredictor):
             'Color Image Denoising': 'color_dn',
             'JPEG Compression Artifact Reduction': 'jpeg_car'
         }
+        self.model = None
 
 
     def predict(self, 
@@ -130,8 +131,9 @@ class Predictor(BasePredictor):
             frames = list(frames_path.glob('*.jpg'))
             frames.sort()
             for frame in frames:
+                print("upscaling path", frame)
                 path = self.predict(frame, task_type, jpeg, noise)
-                print("path", path)
+                print("upscaled path", path)
                 os.system('mv -v {} {}'.format(path, frame))
 
             # Create video
@@ -152,9 +154,10 @@ class Predictor(BasePredictor):
             else:
                 self.args.folder_gt = input_dir
             # print("loading model", self.args.model_path)
-            model = define_model(self.args)
-            model.eval()
-            model = model.to(self.device)
+            if not self.model:
+                self.model = define_model(self.args)
+                self.model.eval()
+                self.model = self.model.to(self.device)
             # print("loaded model")
             # setup folder and path
             folder, save_dir, border, window_size = setup(self.args)
@@ -183,7 +186,7 @@ class Predictor(BasePredictor):
                     w_pad = (w_old // window_size + 1) * window_size - w_old
                     img_lq = torch.cat([img_lq, torch.flip(img_lq, [2])], 2)[:, :, :h_old + h_pad, :]
                     img_lq = torch.cat([img_lq, torch.flip(img_lq, [3])], 3)[:, :, :, :w_old + w_pad]
-                    output = model(img_lq)
+                    output = self.model(img_lq)
                     output = output[..., :h_old * self.args.scale, :w_old * self.args.scale]
 
                 # save image
@@ -194,8 +197,7 @@ class Predictor(BasePredictor):
                 cv2.imwrite(str(out_path), output)
         finally:
             clean_folder(input_dir)
-        # return Path(out_path)
-        return None
+        return Path(out_path)
 
 
 def clean_folder(folder):
