@@ -100,9 +100,9 @@ class Predictor(BasePredictor):
         else:
             self.args.model_path = self.model_zoo[self.args.task][jpeg]
 
-        mimestart = mimetypes.guess_type(image)[0]
+        mimestart = mimetypes.guess_type(str(image))[0]
         if mimestart is None:
-            raise Exception("Could not determine file type of " + image)
+            raise Exception("Could not determine file type of " + str(image))
         mimestart = mimestart.split('/')[0]
         is_video = mimestart == 'video'
         # print("is_video", is_video)
