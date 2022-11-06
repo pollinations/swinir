@@ -9,13 +9,12 @@ import tempfile
 from collections import OrderedDict
 
 import cv2
+import magic
 import numpy as np
 import torch
 from cog import BasePredictor, Input, Path
 
 from main_test_swinir import define_model, get_image_pair, setup
-
-mimetypes.init()
 
 
 class Predictor(BasePredictor):
@@ -100,7 +99,7 @@ class Predictor(BasePredictor):
         else:
             self.args.model_path = self.model_zoo[self.args.task][jpeg]
 
-        mimestart = mimetypes.guess_type(str(image))[0]
+        mimestart = magic.from_file(image, mime=True)
         if mimestart is None:
             raise Exception("Could not determine file type of " + str(image))
         mimestart = mimestart.split('/')[0]

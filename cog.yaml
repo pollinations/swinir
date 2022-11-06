@@ -5,6 +5,7 @@ build:
     - "libgl1-mesa-glx"
     - "libglib2.0-0"
     - "ffmpeg"
+    - "libmagic-dev"
   python_packages:
     - "torchvision==0.9.0"
     - "torch==1.8.0"
@@ -14,6 +15,7 @@ build:
     - "Pillow==8.3.2"
     - "timm==0.4.12"
     - "ipython==7.19.0"
+    - "python-magic==0.4.27"
   run:
     - mkdir -p /experiments/pretrained_models
     - wget https://github.com/JingyunLiang/SwinIR/releases/download/v0.0/003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x4_GAN.pth -P experiments/pretrained_models
