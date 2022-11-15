@@ -13,7 +13,6 @@ import magic
 import numpy as np
 import torch
 from cog import BasePredictor, Input, Path
-
 from main_test_swinir import define_model, get_image_pair, setup
 
 
@@ -120,14 +119,14 @@ class Predictor(BasePredictor):
             print("framerate", framerate)
 
             # Extract frames
-            # execute !ffmpeg -i "$video_file" /%05d.jpg
+            # execute !ffmpeg -i "$video_file" /%05d.png
             # using python os.system
             frames_path = Path('/output/')
             frames_path.mkdir(exist_ok=True)
-            os.system('ffmpeg -i {} {}/%05d.jpg'.format(image, frames_path))
+            os.system('ffmpeg -i {} {}/%05d.png'.format(image, frames_path))
 
             # Process frames
-            frames = list(frames_path.glob('*.jpg'))
+            frames = list(frames_path.glob('*.png'))
             frames.sort()
             for frame in frames:
                 print("upscaling path", frame)
@@ -136,10 +135,10 @@ class Predictor(BasePredictor):
                 os.system('mv -v {} {}'.format(path, frame))
 
             # Create video
-            # execute !ffmpeg -framerate "$framerate" -i /%05d.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p "$output_file"
+            # execute !ffmpeg -framerate "$framerate" -i /%05d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p "$output_file"
             # using python os.system
             output_file = Path('/output/output.mp4')
-            os.system('ffmpeg -framerate {} -i {}/%05d.jpg -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {}'.format(framerate, frames_path, output_file))
+            os.system('ffmpeg -framerate {} -i {}/%05d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {}'.format(framerate, frames_path, output_file))
             return output_file
         try:
             
