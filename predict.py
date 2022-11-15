@@ -133,9 +133,11 @@ class Predictor(BasePredictor):
                 path = self.predict(frame, task_type, jpeg, noise)
                 print("upscaled path", path)
                 os.system('mv -v {} {}'.format(path, frame))
+                # anything in the /outputs folder will be shown as feedback to the user in the pollinations UI
+                os.system('cp -v {} {}'.format(frame, "/outputs/a_progress.png"))
 
             # Create video
-            # execute !ffmpeg -framerate "$framerate" -i /%05d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p "$output_file"
+            # execute !ffmpeg -framerate "$framerate" -i /%05d  -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p "$output_file"
             # using python os.system
             output_file = Path('/output/output.mp4')
             os.system('ffmpeg -framerate {} -i {}/%05d.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p {}'.format(framerate, frames_path, output_file))
