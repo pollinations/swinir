@@ -22,6 +22,7 @@ class Predictor(BasePredictor):
 
         self.model_zoo = {
             'real_sr': {
+                2: os.path.join(model_dir, '003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x2_GAN.pth'),
                 4: os.path.join(model_dir, '003_realSR_BSRGAN_DFO_s64w8_SwinIR-M_x4_GAN.pth')
             },
             'gray_dn': {
@@ -78,6 +79,9 @@ class Predictor(BasePredictor):
             default='Real-World Image Super-Resolution',
             choices=['Real-World Image Super-Resolution', 'Grayscale Image Denoising', 'Color Image Denoising','JPEG Compression Artifact Reduction']        
         ),  
+        scale_factor: int = Input(
+            description="updscale factor for RealSR. 2 or 4 are allowed ",
+            default=4),
         jpeg: int = Input(
             description="scale factor, activated for JPEG Compression Artifact Reduction. ",
             default=40),
@@ -91,8 +95,9 @@ class Predictor(BasePredictor):
 
         # set model path
         if self.args.task == 'real_sr':
-            self.args.scale = 4
-            self.args.model_path = self.model_zoo[self.args.task][4]
+            self.args.scale = scale_factor
+            print("scale_factor",scale_factor)
+            self.args.model_path = self.model_zoo[self.args.task][scale_factor]
         elif self.args.task in ['gray_dn', 'color_dn']:
             self.args.model_path = self.model_zoo[self.args.task][noise]
         else:
@@ -130,7 +135,7 @@ class Predictor(BasePredictor):
             frames.sort()
             for frame in frames:
                 print("upscaling path", frame)
-                path = self.predict(frame, task_type, jpeg, noise)
+                path = self.predict(frame, task_type, scale_factor, jpeg, noise)
                 print("upscaled path", path)
                 os.system('mv -v {} {}'.format(path, frame))
                 # anything in the /outputs folder will be shown as feedback to the user in the pollinations UI
