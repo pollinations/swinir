@@ -80,7 +80,7 @@ class Predictor(BasePredictor):
             choices=['Real-World Image Super-Resolution', 'Grayscale Image Denoising', 'Color Image Denoising','JPEG Compression Artifact Reduction']        
         ),  
         scale_factor: int = Input(
-            description="updscale factor for RealSR. 2 or 4 are allowed ",
+            description="updscale factor for RealSR. 2 or 4 are allowed",
             default=4),
         jpeg: int = Input(
             description="scale factor, activated for JPEG Compression Artifact Reduction. ",
@@ -139,7 +139,7 @@ class Predictor(BasePredictor):
                 print("upscaled path", path)
                 os.system('mv -v {} {}'.format(path, frame))
                 # anything in the /outputs folder will be shown as feedback to the user in the pollinations UI
-                os.system('cp -v {} {}'.format(frame, "/outputs/a_progress.png"))
+                os.system('cp -v {} {}'.format(frame, "/output/a_progress.png"))
 
             # Create video
             # execute !ffmpeg -framerate "$framerate" -i /%05d  -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p "$output_file"
